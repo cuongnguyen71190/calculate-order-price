@@ -1,0 +1,44 @@
+version: "3.8"
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: "example-app:1.0"
+    container_name: example-app
+    tty: true
+    depends_on:
+      - mysql
+    ports:
+      - 80:80
+    env_file:
+      - .env
+    volumes:
+      - ./:/var/www/html
+      - ./vhost.conf:/etc/httpd/conf.d/order.conf
+    networks:
+      - example-network
+  mysql:
+    image: mariadb:10.5
+    container_name: example-mysql
+    env_file:
+      - .env
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
+      MYSQL_DATABASE: ${DB_DATABASE}
+      MYSQL_USER: ${DB_USERNAME}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+    ports:
+      - 3306:3306
+    networks:
+      - example-network
+    restart: always
+    volumes:
+      - dbdata:/var/lib/mysql
+volumes:
+  dbdata:
+
+networks:
+  example-network:
+    driver: bridge
